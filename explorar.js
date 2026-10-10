@@ -25,8 +25,8 @@
     dep_federal: { nome: "Deputado Federal", turnos: [1], brasil: false, dep: true },
     dep_estadual: { nome: "Deputado Estadual", turnos: [1], brasil: false, dep: true },
   };
-  // o que existe de 2026 por enquanto (o resto: 2022 apenas)
-  const TEM2026 = { presidente: { t1: "todos" }, governador: { t1: ["AC", "AM", "DF", "ES", "RJ", "RN", "TO"] } };
+  // o que existe de 2026 (1º turno de todos os cargos, 27 UFs; o 2º turno de 2026 fica nas páginas da apuração ao vivo)
+  const TEM2026 = { presidente: { t1: "todos" }, governador: { t1: "todos" }, senador: { t1: "todos" }, dep_federal: { t1: "todos" }, dep_estadual: { t1: "todos" } };
 
   // ------------------------------------------------------------ estado da tela (e do endereço)
   const q = new URLSearchParams(location.search);
