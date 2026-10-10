@@ -1,0 +1,32 @@
+/* Explorador de eleições (usa /apuracao2026/estilo.css e 2turno/t2.css) */
+.ex-ctl{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:flex-end;margin:4px 0 14px}
+.ex-grupo{display:flex;flex-direction:column;gap:4px}
+.ex-grupo > span{font-size:12px;color:var(--mute);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:14px;border:0;border-left:1px solid var(--line);background:var(--paper);color:var(--ink-2);padding:7px 12px;cursor:pointer}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:600}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.ex-cid input{font:inherit;font-size:15px;padding:7px 12px;border:2px solid #F2C230;border-radius:8px;min-width:260px}
+.pg .volta-br{font:inherit;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;background:#F2C230;color:#16243A;border:0;border-radius:18px;padding:6px 14px;margin-right:10px;cursor:pointer}
+.pg .volta-br:hover{background:#E5B41F}
+.pg .mapa-trilha{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.leg-sw{display:inline-flex;margin-right:8px}
+.leg-sw i{display:inline-block;width:22px;height:12px}
+.ex-busca{margin-bottom:12px;font-size:14px}
+.ex-busca input{font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;min-width:280px;margin-left:6px}
+.pg h3.sec{font-size:16px;margin:4px 0 8px}
+.ex-graf{max-width:620px}
+svg.disp{width:100%;height:auto;font:11px "Archivo",system-ui,sans-serif;fill:var(--mute)}
+svg.disp .g{stroke:var(--line);stroke-width:1}
+svg.disp .diag{stroke:#16243A;stroke-width:1.5;stroke-dasharray:5 4}
+svg.disp .t{fill:var(--ink-2);font-size:12px}
+#ex-extra{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:start}
+#ex-extra:empty{display:none}
+#ex-extra-p:has(#ex-extra:empty){display:none}
+#ex-extra > .ex-busca,#ex-extra > h3,#ex-extra > .tw,#ex-extra > .nota{grid-column:1/-1}
+@media (max-width:1000px){#ex-extra{grid-template-columns:minmax(0,1fr)}.ex-cid input{min-width:0;width:100%}.ex-cid{flex-basis:100%}}
+
+#ex-extra > *{min-width:0}
+.pg .mapa-grade > div{min-width:0}
+main.pg{overflow-x:clip}

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eleições 2022 e 2026 por cidade: mapa, resultados e comparação · Radar Numérico</title>
+<meta name="description" content="Explore os resultados das eleições de 2022 e 2026 em todos os 5.570 municípios: Presidente, Governador, Senador e Deputados, no mapa, cidade por cidade. Compare 2022 × 2026 e veja onde o voto mudou.">
+<link rel="canonical" href="https://radarnumerico.com.br/eleicoes/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Radar Numérico">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Eleições 2022 e 2026 por cidade, no mapa">
+<meta property="og:description" content="Presidente, Governador, Senador e Deputados em todos os municípios. Compare 2022 × 2026 e veja onde o voto mudou.">
+<meta property="og:url" content="https://radarnumerico.com.br/eleicoes/">
+<meta property="og:image" content="https://radarnumerico.com.br/eleicoes/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/apuracao2026/estilo.css?v=2512">
+<link rel="stylesheet" href="/apuracao2026/2turno/t2.css?v=2512">
+<link rel="stylesheet" href="explorar.css?v=1">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RDGZ8VSS5R"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-RDGZ8VSS5R");</script>
+</head>
+<body>
+<nav class="site-nav" aria-label="Seções do site"><div class="nav-in"><a class="brand" href="/" title="Página inicial do Radar Numérico"><img src="/logo.png" alt="" width="22" height="25">Radar Numérico<span>Eleições</span></a><ul><li><a class="item" href="/apuracao2026/2turno/">2º turno 2026 ao vivo</a></li><li><a class="item" href="/apuracao2026/">1º turno 2026</a></li><li><a class="item" href="/eleicoes/" aria-current="page">Explorador 2022 × 2026</a></li><li><a class="item" href="/#sobre">Sobre</a></li></ul></div></nav>
+<main class="pg">
+  <div class="cab">
+    <h1>Eleições por cidade<small>Presidente, Governador, Senador e Deputados em todos os municípios do Brasil · 2022, 2026 e a comparação</small></h1>
+  </div>
+  <div class="ex-ctl">
+    <div class="ex-grupo"><span>Ano</span><div class="seg" id="ex-anos" role="group" aria-label="Ano"><button type="button" data-v="2022">2022</button><button type="button" data-v="2026">2026</button><button type="button" data-v="comp">2022 × 2026</button></div></div>
+    <div class="ex-grupo"><span>Cargo</span><div class="seg" id="ex-cargos" role="group" aria-label="Cargo"><button type="button" data-v="presidente">Presidente</button><button type="button" data-v="governador">Governador</button><button type="button" data-v="senador">Senador</button><button type="button" data-v="dep_federal">Dep. Federal</button><button type="button" data-v="dep_estadual">Dep. Estadual</button></div></div>
+    <div class="ex-grupo"><span>Turno</span><div class="seg" id="ex-turnos" role="group" aria-label="Turno"><button type="button" data-v="1">1º</button><button type="button" data-v="2">2º</button></div></div>
+    <div class="ex-grupo ex-cid"><span>Sua cidade</span><input id="busca-cidade" list="cidades-lista" type="search" placeholder="Digite o nome da cidade" aria-label="Buscar cidade"><datalist id="cidades-lista"></datalist></div>
+  </div>
+  <div class="ctl"><div class="compartilhar" id="compartilhar"></div></div>
+  <section class="painel" id="painel-mapa"><h2><span id="ex-sel">Presidente · 2022</span> <small id="ex-sub"></small></h2>
+    <div class="mapa-grade"><div><div class="mapa-trilha" id="mapa-trilha"></div><div id="mapa"><p class="vazio">carregando o mapa…</p></div><div class="mapa-leg" id="mapa-leg"></div></div>
+    <div><input id="mapa-filtro" type="search" placeholder="Filtrar cidades do estado" aria-label="Filtrar cidades" hidden><div class="mapa-lista" id="mapa-lista"></div><div id="mapa-det"></div></div></div></section>
+  <section class="painel" id="ex-extra-p"><div id="ex-extra"></div></section>
+  <section class="texto">
+    <h2>Como usar</h2>
+    <p>Escolha o ano, o cargo e o turno no alto. No mapa do Brasil, clique num estado para ver as cidades; clique numa cidade para ver todos os candidatos. A cor mostra quem venceu, e fica mais forte quanto mais folgada foi a vitória. Para deputados, a cor é a do partido mais votado na cidade, e dá para escolher um candidato e ver no mapa onde ele foi mais forte.</p>
+    <h2>2022 × 2026</h2>
+    <p>A comparação mostra, cidade por cidade, como mudou a votação de Lula (PT) e do candidato do PL no 1º turno para Presidente: Jair Bolsonaro em 2022 e Flávio Bolsonaro em 2026. Como os candidatos do PL são pessoas diferentes, a comparação é entre partidos, não entre as mesmas pessoas.</p>
+    <h2>Fonte</h2>
+    <p>Tribunal Superior Eleitoral: Portal de Dados Abertos (2022) e arquivos públicos de resultados (2026). Votos válidos; votos anulados por decisão judicial ficam fora. Projeto apartidário do Radar Numérico.</p>
+  </section>
+</main>
+<script src="/apuracao2026/mapa.js?v=2512"></script>
+<script src="explorar.js?v=1"></script>
+<script src="/apuracao2026/compartilhar.js?v=2512"></script>
+</body>
+</html>
