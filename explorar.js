@@ -86,6 +86,20 @@
     return { areas: out, cands: j.c, partidos: j.p };
   }
 
+  // deputados no Brasil: resumo por estado (d/{ano}-{cargo}-br.json, gerado por gerar_resumo_dep.py)
+  let resumo = null;
+  async function lerResumoBR(ano, cargo) {
+    const j = await getJ(`d/${ano}-${cargo}-br.json`);
+    resumo = j;
+    const out = {};
+    for (const [uf, u] of Object.entries(j.ufs)) {
+      const votos = {}, nomes = {}, cad = {};
+      for (const [p, v, c] of u.p) { votos[p] = v; nomes[p] = [p, p]; cad[p] = c; }
+      out[UF_COD[uf]] = { nome: NOMES[uf], vv: u.vv, votos, nomes, cad, vagas: u.v };
+    }
+    return out;
+  }
+
   // ------------------------------------------------------------ análise e cores
   function analisa(x) {
     const ord = Object.entries(x.votos || {}).map(([n, v]) => ({ n, v })).sort((a, b) => b.v - a.v);
@@ -116,7 +130,7 @@
     const ano = anoModo();
     if (!disponivel(ano, E.cargo, E.turno, uf)) return null;
     if (cg.dep) {
-      if (uf === "BR") return {};
+      if (uf === "BR") return lerResumoBR(ano, E.cargo);
       const d = await lerDep(ano, E.cargo, uf); extra = d; return d.areas;
     }
     return lerMaj(ano, E.cargo, E.turno, uf);
@@ -154,7 +168,7 @@
     if (E.selSlug && !br) { const c = Object.keys(vals).find((k) => slug(vals[k].nome) === E.selSlug); if (c) E.sel = c; E.selSlug = null; }
     const geo = await M.carregar(BASE_GEO, br ? "br" : E.nivel.toLowerCase());
     if (meu !== desenhar.n) return;
-    const semCor = br && cg.dep;
+    const semCor = false;
     svgAtual = M.desenhar($("#mapa"), geo, {
       rotulo: br ? "Mapa do Brasil" : "Mapa de " + NOMES[E.nivel], sel: E.sel,
       cor: (cod) => semCor ? "#D5DBE3" : cor(cod),
@@ -162,7 +176,7 @@
       clique: (cod) => br ? abrir(ufDeCod(cod)) : selecionar(cod),
     });
     $("#mapa").classList.toggle("mun", !br);
-    legenda(); lista(); painelExtra();
+    legenda(); lista(); painelExtra(); camara();
     if (E.sel && !br) detalhe(E.sel); else $("#mapa-det").innerHTML = br && cg.dep ? '<p class="nota forte">Deputados são eleitos por estado: escolha um estado no mapa ou na lista para ver os mais votados de cada cidade.</p>' : "";
     urlEstado();
   }
@@ -185,7 +199,8 @@
     const a = analisa(x); if (!a.vv) return `<b>${esc(nome)}</b><br><small>sem votos</small>`;
     let s = `<b>${esc(nome)}</b>`;
     if (E.cand && extra) { const t = (x.top || []).find((k) => String(k.c[0]) === E.cand); s += `<div>${esc(candNome())}: <b>${t ? fmt(t.v) + " votos (" + pct(t.v / x.vv) + ")" : "fora dos 20 mais votados"}</b></div>`; }
-    s += a.ord.slice(0, 3).map((c) => `<div><i class="dot" style="background:${corDe(x, c.n)}"></i>${esc(nomeDe(x, c.n)[0])} <b>${pct(c.v / a.vv)}</b></div>`).join("");
+    s += a.ord.slice(0, 3).map((c) => `<div><i class="dot" style="background:${corDe(x, c.n)}"></i>${esc(nomeDe(x, c.n)[0])} <b>${pct(c.v / a.vv)}</b>${x.cad ? ` · ${x.cad[c.n] || 0} cad.` : ""}</div>`).join("");
+    if (x.cad) s += `<small>${x.vagas} cadeiras · clique para ver por cidade</small><br>`;
     return s + `<small>vantagem: +${fmt(a.dif)} votos</small>`;
   }
   function legenda() {
@@ -240,6 +255,63 @@
 
   // ------------------------------------------------------------ painéis extras: busca de deputado; dispersão e "viraram" na comparação
   function candNome() { const c = extra && extra.cands.find((k) => String(k[0]) === E.cand); return c ? `${c[1]} (${c[2]})` : ""; }
+  // ------------------------------------------------------------ painel da Câmara / Assembleias (deputados, Brasil)
+  function lugares(total) {
+    const filas = total > 600 ? 17 : 12, r0 = 0.40, r1 = 1;
+    const raios = Array.from({ length: filas }, (_, i) => r0 + (r1 - r0) * i / (filas - 1));
+    const somaR = raios.reduce((s, r) => s + r, 0);
+    const porFila = raios.map((r) => Math.round(total * r / somaR));
+    porFila[filas - 1] += total - porFila.reduce((s, n) => s + n, 0);
+    const pts = [];
+    raios.forEach((r, i) => { const n = porFila[i]; for (let j = 0; j < n; j++) { const a = Math.PI * (1 - j / Math.max(1, n - 1)); pts.push({ x: r * Math.cos(a), y: r * Math.sin(a), a }); } });
+    pts.sort((p, q) => q.a - p.a || Math.hypot(p.x, p.y) - Math.hypot(q.x, q.y));
+    return { pts, raio: (r1 - r0) / (filas - 1) * 100 * 0.46 };
+  }
+  function hemiciclo(legs, total, rot) {
+    const { pts, raio } = lugares(total);
+    const cores = [];
+    for (const x of legs) for (let i = 0; i < x.c; i++) cores.push({ c: x.cor, t: `${x.id}: ${x.c}` });
+    const circ = pts.map((p, i) => { const k = cores[i]; return `<circle cx="${(p.x * 100).toFixed(2)}" cy="${(-p.y * 100).toFixed(2)}" r="${raio.toFixed(2)}" fill="${k ? k.c : "#E3E7ED"}"><title>${k ? esc(k.t) : ""}</title></circle>`; }).join("");
+    return `<svg class="hemi" viewBox="-104 -104 208 110" role="img" aria-label="${esc(rot)}">${circ}<text x="0" y="-13" text-anchor="middle" class="h-num">${fmt(total)}</text><text x="0" y="-3" text-anchor="middle" class="h-rot">cadeiras</text></svg>`;
+  }
+  function camara() {
+    const el = $("#ex-camara"), cg = CARGOS[E.cargo];
+    const ok = cg.dep && E.nivel === "BR" && E.modo !== "comp" && !E.cand && resumo && resumo.cargo === E.cargo && resumo.ano === anoModo();
+    el.hidden = !ok;
+    if (!ok) return;
+    const R = resumo.clausula, fedDe = {};
+    for (const [f, ps] of Object.entries(resumo.fed || {})) for (const p of ps) fedDe[p] = f;
+    const L = {}; let VB = 0, total = 0;
+    for (const [uf, u] of Object.entries(resumo.ufs)) {
+      VB += u.vv; total += u.v; const loc = {};
+      for (const [p, v, c] of u.p) {
+        const id = fedDe[p] || p;
+        const x = L[id] = L[id] || { id, v: 0, c: 0, ufs: 0, ufc: new Set(), membros: {}, cor: corPartido(resumo.fed && resumo.fed[id] ? resumo.fed[id][0] : p) };
+        x.v += v; x.c += c; if (c) x.ufc.add(uf); if (fedDe[p]) x.membros[p] = (x.membros[p] || 0) + c;
+        loc[id] = (loc[id] || 0) + v;
+      }
+      if (R) for (const [id, v] of Object.entries(loc)) if (u.vv && v / u.vv * 100 >= R.pctUf) L[id].ufs++;
+    }
+    const legs = Object.values(L).filter((x) => x.c > 0 || x.v / VB >= 0.01).sort((a, b) => b.c - a.c || b.v - a.v);
+    const ano = anoModo(), fed = E.cargo === "dep_federal";
+    const pc1 = (x) => x.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
+    let linhas = legs.map((x) => {
+      const pv = x.v / VB * 100, sub = Object.keys(x.membros).length ? `<small>${Object.entries(x.membros).map(([m, n]) => esc(m) + (n ? " " + n : "")).join(" · ")}</small>` : "";
+      let cl = "";
+      if (R) {
+        const porV = pv >= R.pctBrasil && x.ufs >= R.minUfs, porE = x.c >= R.deputados && x.ufc.size >= R.minUfs;
+        cl = `<td>${x.ufs}</td><td>${porV || porE ? `<span class="cl sim" title="Passa ${porV && porE ? "por votos e por eleitos" : porV ? "por votos" : "por eleitos"}">✓</span>` : `<span class="cl nao" title="Não atinge">✗</span>`}</td>`;
+      }
+      return `<tr><td class="l"><i class="dot" style="background:${x.cor}"></i><b>${esc(x.id)}</b>${sub}</td><td><b>${x.c || "–"}</b></td><td>${pc1(pv)}</td>${fed ? "" : `<td>${x.ufc.size || "–"}</td>`}${cl}</tr>`;
+    }).join("");
+    const cab = `<th class="l">Partido / federação</th><th>Cadeiras</th><th>% votos</th>${fed ? "" : "<th title=\"Estados em que elegeu deputados\">Estados</th>"}${R ? `<th title="Estados com pelo menos ${pc1(R.pctUf)} dos votos válidos">UFs ≥${pc1(R.pctUf).replace(",0", "")}</th><th>Cláusula</th>` : ""}`;
+    const nota = R ? `<p class="nota">Cláusula de barreira ${ano}: ✓ com ${pc1(R.pctBrasil).replace(",0", "")} dos votos válidos no Brasil e ${pc1(R.pctUf).replace(",0", "")} em pelo menos ${R.minUfs} estados, ou com ${R.deputados} deputados eleitos em pelo menos ${R.minUfs} estados. Federações contam como uma legenda. Resultado do TSE.</p>`
+      : `<p class="nota">Soma das ${fmt(total)} cadeiras das 27 Assembleias Legislativas (e da Câmara Legislativa do DF). Federações contam como uma legenda. Resultado do TSE.</p>`;
+    const titulo = fed ? `Câmara dos Deputados · ${ano}` : `Assembleias Legislativas · ${ano}`;
+    const link = ano === "2026" && fed ? `<a class="ex-link" href="/apuracao2026/">Quociente, sobras e cadeiras garantidas em cada estado →</a>` : ano === "2026" ? `<a class="ex-link" href="/apuracao2026/estaduais.html">Quociente e sobras em cada estado →</a>` : "";
+    el.innerHTML = `<h2>${titulo} <small>${fmt(total)} cadeiras · 1º turno</small></h2><div class="ex-cam"><div>${hemiciclo(legs, total, titulo)}${link}</div><div class="tw"><table><thead><tr>${cab}</tr></thead><tbody>${linhas}</tbody></table>${nota}</div></div>`;
+  }
+
   function painelExtra() {
     const el = $("#ex-extra");
     if (E.modo === "comp") { el.innerHTML = dispersao() + viraram(); return; }
@@ -251,6 +323,10 @@
       inp.addEventListener("change", () => { const m = /·\s*(\d+)\s*$/.exec(inp.value) || /^(\d+)$/.exec(inp.value.trim()); if (m) { E.cand = m[1]; desenhar(); } });
       const lp = $("#cand-limpar"); if (lp) lp.addEventListener("click", () => { E.cand = ""; desenhar(); });
       el.querySelectorAll("tr[data-cand]").forEach((tr) => tr.addEventListener("click", () => { E.cand = tr.dataset.cand; desenhar(); $("#painel-mapa").scrollIntoView({ behavior: "smooth" }); }));
+      return;
+    }
+    if (E.nivel === "BR" && CARGOS[E.cargo].dep && resumo && resumo.top) {
+      el.innerHTML = `<h3 class="sec">Os 20 mais votados do Brasil · ${CARGOS[E.cargo].nome} ${anoModo()}</h3><div class="tw"><table><thead><tr><th>#</th><th class="l">Candidato</th><th class="l">Partido</th><th class="l">Estado</th><th>Votos</th><th></th></tr></thead><tbody>${resumo.top.map((c, i) => `<tr><td>${i + 1}</td><td class="l">${esc(c[0])}</td><td class="l"><i class="dot" style="background:${corPartido(c[1])}"></i>${esc(c[1])}</td><td class="l">${c[2]}</td><td>${fmt(c[3])}</td><td class="l">${c[4] ? '<span class="tag ok">eleito</span>' : ""}</td></tr>`).join("")}</tbody></table></div><p class="nota">Para ver os mais votados de cada cidade, escolha um estado no mapa.</p>`;
       return;
     }
     el.innerHTML = "";

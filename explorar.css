@@ -30,3 +30,14 @@ svg.disp .t{fill:var(--ink-2);font-size:12px}
 #ex-extra > *{min-width:0}
 .pg .mapa-grade > div{min-width:0}
 main.pg{overflow-x:clip}
+
+/* painel da Câmara / Assembleias (deputados, Brasil) — 10/10 */
+#ex-camara h2{font-size:17px}
+.ex-cam{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:24px;align-items:start}
+.ex-cam svg.hemi{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
+.ex-cam .h-num{font:800 22px "Archivo",system-ui,sans-serif;fill:var(--ink)}
+.ex-cam .h-rot{font:7px "Archivo",system-ui,sans-serif;fill:var(--mute)}
+.ex-cam td small{display:block;color:var(--mute);font-size:11.5px}
+.ex-cam .cl{font-weight:700}.ex-cam .cl.sim{color:#1E8A5A}.ex-cam .cl.nao{color:#C0392B}
+.ex-link{display:inline-block;margin-top:10px;font-size:14px;font-weight:600;color:var(--ink)}
+@media (max-width:900px){.ex-cam{grid-template-columns:minmax(0,1fr)}}
