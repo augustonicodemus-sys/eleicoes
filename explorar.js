@@ -46,11 +46,7 @@
     history.replaceState(null, "", location.pathname + "?" + p);
     navAtual();
   }
-  function navAtual() {
-    document.querySelectorAll(".site-nav [data-ano]").forEach((a) => {
-      if (a.dataset.ano === E.modo) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
-    });
-  }
+  function navAtual() { if (window.RNMenu) RNMenu.marcar(); } // menu de cima (/menu.js) marca o cargo/ano aberto
   navAtual();
 
   // ------------------------------------------------------------ dados
