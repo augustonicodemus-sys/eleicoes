@@ -44,7 +44,14 @@
     if (E.sel && vals[E.sel]) p.set("cidade", slug(vals[E.sel].nome));
     if (E.cand) p.set("cand", E.cand);
     history.replaceState(null, "", location.pathname + "?" + p);
+    navAtual();
   }
+  function navAtual() {
+    document.querySelectorAll(".site-nav [data-ano]").forEach((a) => {
+      if (a.dataset.ano === E.modo) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+  }
+  navAtual();
 
   // ------------------------------------------------------------ dados
   const cache = {};
