@@ -7,7 +7,12 @@
 .seg button:first-child{border-left:0}
 .seg button[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:600}
 .seg button:disabled{opacity:.4;cursor:not-allowed}
+.ex-cid{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:0 0 14px}
+.ex-cid label{font-size:14px;font-weight:600;color:var(--ink-2)}
 .ex-cid input{font:inherit;font-size:15px;padding:7px 12px;border:2px solid #F2C230;border-radius:8px;min-width:260px}
+#ex-cartao{margin-bottom:14px}
+#ex-cartao[hidden],#ex-ctl-comp[hidden]{display:none}
+.pg .ex-res .rod{margin:6px 0 0;font-size:12.5px;color:var(--mute)}
 .pg .volta-br{font:inherit;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;background:#F2C230;color:#16243A;border:0;border-radius:18px;padding:6px 14px;margin-right:10px;cursor:pointer}
 .pg .volta-br:hover{background:#E5B41F}
 .pg .mapa-trilha{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
@@ -25,7 +30,7 @@ svg.disp .t{fill:var(--ink-2);font-size:12px}
 #ex-extra:empty{display:none}
 #ex-extra-p:has(#ex-extra:empty){display:none}
 #ex-extra > .ex-busca,#ex-extra > h3,#ex-extra > .tw,#ex-extra > .nota{grid-column:1/-1}
-@media (max-width:1000px){#ex-extra{grid-template-columns:minmax(0,1fr)}.ex-cid input{min-width:0;width:100%}.ex-cid{flex-basis:100%}}
+@media (max-width:1000px){#ex-extra{grid-template-columns:minmax(0,1fr)}.ex-cid input{min-width:0;flex:1 1 200px}}
 
 #ex-extra > *{min-width:0}
 .pg .mapa-grade > div{min-width:0}
@@ -41,3 +46,9 @@ main.pg{overflow-x:clip}
 .ex-cam .cl{font-weight:700}.ex-cam .cl.sim{color:#1E8A5A}.ex-cam .cl.nao{color:#C0392B}
 .ex-link{display:inline-block;margin-top:10px;font-size:14px;font-weight:600;color:var(--ink)}
 @media (max-width:900px){.ex-cam{grid-template-columns:minmax(0,1fr)}}
+
+/* exterior (16/10) */
+.pg .ex-ext{font:inherit;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:4px 12px;margin-left:8px;cursor:pointer}
+.pg .ex-ext:hover{background:var(--panel)}
+.ex-mundo{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;min-height:260px;color:#3A4A63;background:var(--panel);border-radius:10px;padding:20px}
+.ex-mundo p{margin:0;font-size:14.5px;line-height:1.45}

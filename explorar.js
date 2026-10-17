@@ -12,8 +12,8 @@
   const slug = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const semAcento = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
-  const UF_COD = { RO: 11, AC: 12, AM: 13, RR: 14, PA: 15, AP: 16, TO: 17, MA: 21, PI: 22, CE: 23, RN: 24, PB: 25, PE: 26, AL: 27, SE: 28, BA: 29, MG: 31, ES: 32, RJ: 33, SP: 35, PR: 41, SC: 42, RS: 43, MS: 50, MT: 51, GO: 52, DF: 53 };
-  const NOMES = { AC: "Acre", AL: "Alagoas", AP: "Amapá", AM: "Amazonas", BA: "Bahia", CE: "Ceará", DF: "Distrito Federal", ES: "Espírito Santo", GO: "Goiás", MA: "Maranhão", MT: "Mato Grosso", MS: "Mato Grosso do Sul", MG: "Minas Gerais", PA: "Pará", PB: "Paraíba", PR: "Paraná", PE: "Pernambuco", PI: "Piauí", RJ: "Rio de Janeiro", RN: "Rio Grande do Norte", RS: "Rio Grande do Sul", RO: "Rondônia", RR: "Roraima", SC: "Santa Catarina", SP: "São Paulo", SE: "Sergipe", TO: "Tocantins" };
+  const UF_COD = { RO: 11, AC: 12, AM: 13, RR: 14, PA: 15, AP: 16, TO: 17, MA: 21, PI: 22, CE: 23, RN: 24, PB: 25, PE: 26, AL: 27, SE: 28, BA: 29, MG: 31, ES: 32, RJ: 33, SP: 35, PR: 41, SC: 42, RS: 43, MS: 50, MT: 51, GO: 52, DF: 53, ZZ: 99 }; // ZZ = exterior (só Presidente)
+  const NOMES = { AC: "Acre", AL: "Alagoas", AP: "Amapá", AM: "Amazonas", BA: "Bahia", CE: "Ceará", DF: "Distrito Federal", ES: "Espírito Santo", GO: "Goiás", MA: "Maranhão", MT: "Mato Grosso", MS: "Mato Grosso do Sul", MG: "Minas Gerais", PA: "Pará", PB: "Paraíba", PR: "Paraná", PE: "Pernambuco", PI: "Piauí", RJ: "Rio de Janeiro", RN: "Rio Grande do Norte", RS: "Rio Grande do Sul", RO: "Rondônia", RR: "Roraima", SC: "Santa Catarina", SP: "São Paulo", SE: "Sergipe", TO: "Tocantins", ZZ: "Exterior" };
   const ufDeCod = (c) => Object.keys(UF_COD).find((u) => String(UF_COD[u]) === String(c));
   const COR = { PL: "#12286B", PT: "#D7263D", PSD: "#8B5E3C", MDB: "#A47551", "União": "#3F8FD8", UNIÃO: "#3F8FD8", PP: "#2F6FB8", Republicanos: "#62B6E2", REPUBLICANOS: "#62B6E2", NOVO: "#FF7A00", PSOL: "#7B2CBF", PSB: "#2E8B57", PDT: "#5DAE6B", PSDB: "#6E7C91", Podemos: "#7D8590", PODE: "#7D8590", "Missão": "#F2C230", MISSÃO: "#F2C230", PCdoB: "#B5172B", "PC do B": "#B5172B", PV: "#3E9B4F", REDE: "#5EAD8C", Cidadania: "#E08A9B", CIDADANIA: "#E08A9B", Solidariedade: "#E37B2B", SOLIDARIEDADE: "#E37B2B", Avante: "#6B5B4E", AVANTE: "#6B5B4E", PSC: "#4A7A3F", PTB: "#3D5A3A", PROS: "#C9A227", Patriota: "#2B4F81", PATRIOTA: "#2B4F81", DC: "#B3DCF5", PRTB: "#5FA8D3", PMB: "#C46BAE", Agir: "#8E7CC3", AGIR: "#8E7CC3", PCO: "#9CCC65", PSTU: "#6E9F3F", UP: "#4F9A5E", PCB: "#8B1E2B", PMN: "#A1887F", PRD: "#8C7B6B", DEMOCRATA: "#A3C9E8" };
   const corPartido = (p) => COR[p] || COR[String(p).toUpperCase()] || "#9AA3AE";
@@ -153,6 +153,7 @@
   // ------------------------------------------------------------ desenho
   async function desenhar() {
     const meu = (desenhar.n = (desenhar.n || 0) + 1);
+    if (E.nivel === "ZZ" && E.cargo !== "presidente") E.nivel = "BR";
     const br = E.nivel === "BR", cg = CARGOS[E.cargo];
     controles(); trilha();
     $("#ex-sub").textContent = subtitulo();
@@ -162,10 +163,18 @@
     if (meu !== desenhar.n) return;
     if (v == null) {
       $("#mapa").innerHTML = `<p class="aviso">Ainda não temos ${esc(cg.nome.toLowerCase())} de ${anoModo()} ${E.turno}º turno ${br ? "" : "em " + esc(NOMES[E.nivel])} no explorador. Escolha outro cargo, outro ano ou outro estado.</p>`;
-      $("#mapa-lista").innerHTML = ""; $("#mapa-det").innerHTML = ""; $("#mapa-leg").innerHTML = ""; $("#ex-extra").innerHTML = ""; return;
+      $("#mapa-lista").innerHTML = ""; $("#mapa-det").innerHTML = ""; $("#mapa-leg").innerHTML = ""; $("#ex-extra").innerHTML = ""; vals = {}; cartao(); return;
     }
-    vals = v;
+    vals = v; trilha();
     if (E.selSlug && !br) { const c = Object.keys(vals).find((k) => slug(vals[k].nome) === E.selSlug); if (c) E.sel = c; E.selSlug = null; }
+    if (E.nivel === "ZZ") { // exterior: sem mapa, só a lista das cidades
+      svgAtual = null;
+      $("#mapa").innerHTML = `<div class="ex-mundo"><svg viewBox="0 0 24 24" width="64" height="64" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 12h19M12 2.5c2.8 3 2.8 16 0 19M12 2.5c-2.8 3-2.8 16 0 19" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><p><b>Votos no exterior</b><br>${fmt(Object.keys(vals).length)} cidades em outros países. Clique numa cidade da lista para ver o resultado.</p></div>`;
+      $("#mapa").classList.remove("mun");
+      legenda(); lista(); painelExtra(); camara(); cartao();
+      if (E.sel) detalhe(E.sel); else $("#mapa-det").innerHTML = "";
+      urlEstado(); return;
+    }
     const geo = await M.carregar(BASE_GEO, br ? "br" : E.nivel.toLowerCase());
     if (meu !== desenhar.n) return;
     const semCor = false;
@@ -176,7 +185,7 @@
       clique: (cod) => br ? abrir(ufDeCod(cod)) : selecionar(cod),
     });
     $("#mapa").classList.toggle("mun", !br);
-    legenda(); lista(); painelExtra(); camara();
+    legenda(); lista(); painelExtra(); camara(); cartao();
     if (E.sel && !br) detalhe(E.sel); else $("#mapa-det").innerHTML = br && cg.dep ? '<p class="nota forte">Deputados são eleitos por estado: escolha um estado no mapa ou na lista para ver os mais votados de cada cidade.</p>' : "";
     urlEstado();
   }
@@ -208,7 +217,7 @@
     if (E.modo === "comp") { el.innerHTML = `<span class="leg-sw">${[3, 2, 1, 0].map((i) => `<i style="background:${mistura("#D7263D", TONS_SW[i])}"></i>`).join("")}${[0, 1, 2, 3].map((i) => `<i style="background:${mistura("#12286B", TONS_SW[i])}"></i>`).join("")}</span><span class="leg-tons">vermelho: o PT ganhou terreno de 2022 para 2026 · azul: o PL ganhou terreno. Quanto mais forte, maior a mudança na diferença entre os dois (até 2, 2 a 5, 5 a 10, mais de 10 pontos percentuais)</span>`; return; }
     if (E.cand && extra) { el.innerHTML = `<span class="leg-sw">${ESCALA.map((c) => `<i style="background:${c}"></i>`).join("")}</span><span class="leg-tons">% dos votos válidos de ${esc(candNome())} em cada cidade: 0 · até 1 · 1–2 · 2–5 · 5–10 · 10–20 · mais de 20</span>`; return; }
     const conta = {};
-    for (const x of Object.values(vals)) { const a = analisa(x); if (a.vv) { const k = nomeDe(x, a.lider)[0]; conta[k] = conta[k] || { n: 0, cor: corDe(x, a.lider) }; conta[k].n++; } }
+    for (const [cod, x] of Object.entries(vals)) { if (E.nivel === "BR" && cod === "99") continue; const a = analisa(x); if (a.vv) { const k = nomeDe(x, a.lider)[0]; conta[k] = conta[k] || { n: 0, cor: corDe(x, a.lider) }; conta[k].n++; } }
     const itens = Object.entries(conta).sort((a, b) => b[1].n - a[1].n).slice(0, 8).map(([k, o]) => `<span><i class="dot" style="background:${o.cor}"></i>${esc(k)} <b>${o.n}</b></span>`).join("");
     el.innerHTML = itens ? `<span class="leg-t">${E.nivel === "BR" ? "Estados" : "Cidades"} em que ${CARGOS[E.cargo].dep ? "o partido foi o mais votado" : "venceu"}:</span>${itens}<span class="leg-tons">quanto mais forte a cor, mais folgada a vitória</span>` : "";
   }
@@ -227,7 +236,7 @@
       linha = ({ x, a }) => a.vv ? `<td class="l"><i class="dot" style="background:${corDe(x, a.lider)}"></i>${esc(nomeDe(x, a.lider)[0])}</td><td>${pct(a.ord[0].v / a.vv)}</td><td class="l">+${fmt(a.dif)}</td>` : `<td colspan="3" class="l">–</td>`;
     }
     el.innerHTML = `<table><thead><tr>${cab}</tr></thead><tbody>${l.map((o) => `<tr data-cod="${o.cod}" class="clic${o.cod === E.sel ? " sel" : ""}"><td class="l">${esc(o.x.nome)}</td>${linha(o)}</tr>`).join("") || `<tr><td class="l" colspan="6">${f ? "nenhuma cidade com esse nome" : "–"}</td></tr>`}</tbody></table>`;
-    $("#mapa-filtro").hidden = br;
+    $("#mapa-filtro").hidden = br; $("#mapa-filtro").placeholder = E.nivel === "ZZ" ? "Filtrar cidades do exterior" : "Filtrar cidades do estado";
   }
   function detalhe(cod) {
     const el = $("#mapa-det"), x = vals[cod];
@@ -253,6 +262,33 @@
     el.innerHTML = titulo + corpo + `<p class="nota">${pe}</p>`;
   }
 
+
+  // ------------------------------------------------------------ cartão do resultado (16/10): o mesmo do 2º turno 2026, sem fotos
+  // Presidente (Brasil ou estado), Governador e Senador (estado). Story + WhatsApp dentro do cartão; nos outros casos, fora dele.
+  function totalNivel() {
+    const v = {}, nomes = {}; let vv = 0;
+    for (const y of Object.values(vals)) { vv += y.vv || 0; for (const [n, k] of Object.entries(y.votos || {})) v[n] = (v[n] || 0) + k; for (const [n, nm] of Object.entries(y.nomes || {})) if (!nomes[n] || E.nivel !== "BR") nomes[n] = nm; }
+    return { votos: v, vv, nomes };
+  }
+  function cartao() {
+    const el = $("#ex-cartao"), fora = $("#compartilhar"), cg = CARGOS[E.cargo];
+    const vale = E.modo !== "comp" && !cg.dep && (E.cargo === "presidente" || E.nivel !== "BR") && Object.keys(vals).length;
+    const bt = window.Compartilhar && Compartilhar.botoes ? Compartilhar.botoes() : "";
+    if (!vale) { el.hidden = true; el.innerHTML = ""; if (fora) fora.innerHTML = bt; $("#ex-ctl-comp").hidden = false; return; }
+    const area = totalNivel(), a = analisa(area);
+    if (!a.vv) { el.hidden = true; el.innerHTML = ""; if (fora) fora.innerHTML = bt; $("#ex-ctl-comp").hidden = false; return; }
+    if (fora) fora.innerHTML = ""; $("#ex-ctl-comp").hidden = true;
+    const lado = a.ord.slice(0, 2).map((c) => { const [nm, p] = nomeDe(area, c.n); return { nome: nm, partido: p || "", cor: corDe(area, c.n), p: c.v / a.vv, v: c.v }; });
+    const [A, B] = lado.length > 1 ? lado : [lado[0], { nome: "", partido: "", cor: "#E3E7ED", p: 0, v: 0 }];
+    const onde = E.nivel === "BR" ? "Brasil" : NOMES[E.nivel];
+    const titulo = E.cargo === "presidente" ? (E.nivel === "BR" ? "Presidente da República" : "Presidente · " + onde) : cg.nome + " · " + onde;
+    const outros = 1 - A.p - B.p;
+    const rod = [`resultado final do ${E.turno}º turno`, `diferença de ${fmt(A.v - B.v)} votos`, outros > 0.0005 ? `outros candidatos: ${pct(outros)}` : "", E.nivel === "BR" && !vals["99"] ? "sem os votos do exterior" : E.nivel === "BR" ? "inclui o exterior" : ""].filter(Boolean).join(" · ");
+    const pessoa = (L, cls) => `<div class="pp ${cls}"><div class="pp-t"><span class="pp-n">${esc(L.nome)} <small>${esc(L.partido)}</small></span><b class="pp-p" style="color:${L.cor}">${pct(L.p)}</b></div></div>`;
+    const barra = `<div class="d-barra mini" role="img" aria-label="${esc(A.nome)} ${pct(A.p)}, ${esc(B.nome)} ${pct(B.p)}"><div style="width:${(A.p * 100).toFixed(2)}%;background:${A.cor}"></div><div style="width:${(Math.max(0, 1 - A.p - B.p) * 100).toFixed(2)}%;background:transparent"></div><div style="width:${(B.p * 100).toFixed(2)}%;background:${B.cor};margin-left:auto"></div><i class="d-meio"></i></div>`;
+    el.innerHTML = `<div class="cartao grande pres ex-res"><h3>${esc(titulo)} <span class="tag-t">${E.turno}º turno · ${anoModo()}</span></h3><div class="pres-lados">${pessoa(A, "pa")}<span class="pres-x" aria-hidden="true">×</span>${pessoa(B, "pb")}</div>${barra}<p class="rod">${rod}</p><div class="share" role="group" aria-label="Compartilhar">${bt}</div></div>`;
+    el.hidden = false;
+  }
   // ------------------------------------------------------------ painéis extras: busca de deputado; dispersão e "viraram" na comparação
   function candNome() { const c = extra && extra.cands.find((k) => String(k[0]) === E.cand); return c ? `${c[1]} (${c[2]})` : ""; }
   // ------------------------------------------------------------ painel da Câmara / Assembleias (deputados, Brasil)
@@ -355,8 +391,11 @@
   }
   function trilha() {
     const el = $("#mapa-trilha");
-    el.innerHTML = E.nivel === "BR" ? "<b>Brasil</b>" : `<button type="button" class="volta-br" id="volta-br" title="Voltar ao mapa do Brasil"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 3l6 1 4 3 4 2-1 4-4 3-2 5-4 1-2-4-3-2 1-4-3-3 2-4z" fill="currentColor"/></svg> Voltar ao Brasil</button> <b>${esc(NOMES[E.nivel])}</b>`;
+    const mundo = '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 12h19M12 2.5c2.8 3 2.8 16 0 19M12 2.5c-2.8 3-2.8 16 0 19" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>';
+    const ext = E.nivel === "BR" && E.cargo === "presidente" && vals["99"] ? ` <button type="button" class="ex-ext" id="ver-ext" title="Votos dos brasileiros no exterior">${mundo} Exterior</button>` : "";
+    el.innerHTML = E.nivel === "BR" ? "<b>Brasil</b>" + ext : `<button type="button" class="volta-br" id="volta-br" title="Voltar ao mapa do Brasil"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 3l6 1 4 3 4 2-1 4-4 3-2 5-4 1-2-4-3-2 1-4-3-3 2-4z" fill="currentColor"/></svg> Voltar ao Brasil</button> <b>${esc(NOMES[E.nivel])}</b>`;
     const b = $("#volta-br"); if (b) b.addEventListener("click", () => abrir("BR"));
+    const x = $("#ver-ext"); if (x) x.addEventListener("click", () => abrir("ZZ"));
   }
   function controles() {
     document.querySelectorAll("#ex-anos button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === E.modo)));
